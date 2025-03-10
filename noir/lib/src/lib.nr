@@ -6,8 +6,7 @@ use std::embedded_curve_ops::{
 
 
 pub fn public_key(priv_key: Field) -> EmbeddedCurvePoint {
-    let x = EmbeddedCurveScalar::from_field(priv_key);
-    fixed_base_scalar_mul(x)
+    field_to_point(priv_key)
 }
 
 pub fn field_to_point(x: Field) -> EmbeddedCurvePoint {
@@ -19,9 +18,8 @@ pub fn encrypt(
     message: Field,
     randomness: Field,
 ) -> (EmbeddedCurvePoint, EmbeddedCurvePoint) {
-    // @Optimise: Use multi_scalar_mul instead of fixed_base_scalar_mul
-    let r = EmbeddedCurveScalar::from_field(randomness);
-    let c1 = fixed_base_scalar_mul(r);
+    // @Optimise: Use multi_scalar_mul instead of separate fixed_base_scalar_mul
+    let c1 = field_to_point(randomness);
     let embedded_message = field_to_point(message);
     let c2 = embedded_curve_add(embedded_message, multi_scalar_mul([pub_key], [r]));
     (c1, c2)
