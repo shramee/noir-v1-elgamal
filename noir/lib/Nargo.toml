@@ -1,0 +1,6 @@
+[package]
+name = "elgamal"
+type = "lib"
+authors = ["shramee"]
+
+[dependencies]
