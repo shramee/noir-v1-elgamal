@@ -12,6 +12,8 @@
 // The implementation follows the mathematical formulation in the documentation with
 // function signatures designed to be simple and composable.
 
+pub mod tests;
+
 use std::embedded_curve_ops::{
     embedded_curve_add, EmbeddedCurvePoint, EmbeddedCurveScalar, fixed_base_scalar_mul,
     multi_scalar_mul,
