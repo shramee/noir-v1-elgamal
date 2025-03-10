@@ -33,3 +33,16 @@ $= (g^{r_1}, m_1 * h^{r_1})(g^{r_2}, m_2 * h^{r_2})$
 $= (g^{r_1+r_2}, (m_1*m_2)h^{r_1+r_2})$  
 $= E(m_1*m_2)$, encryption of product of two cyphertexts.
 
+## 2. Elgamal on Elliptic curves
+
+_As described in the paper [Elliptic Curve Cryptosystems by Neal Koblitz](https://www.ams.org/journals/mcom/1987-48-177/S0025-5718-1987-0866109-5/S0025-5718-1987-0866109-5.pdf)_
+
+The exponentiations are replaced with scalar multiplications and multiplications and divisions are replaced with point additions/subtractions.
+
+**When we do this something really exciting and desirable happens, the originally multiplicative homomorphism of the scheme transforms into additive homomorphism.**
+
+---
+
+For an elliptic curve group with generator **`G`** and scalar field (group order) **`q`**. Points are in capitals and scalar in lowercase.
+
+We need a public known reversible function, $f:m ↦ P_m$. Function $f$ **reversibly** maps messages `m` to points $P_m$ on the curve. Most of the approaches in the **Section 3: Imbedding plaintext** of the paper don't work. We will discuss this in a later section.
