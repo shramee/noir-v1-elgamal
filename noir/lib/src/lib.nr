@@ -7,6 +7,7 @@
 // - Curve-agnostic implementation: No elliptic curve parameters are hardcoded in this library
 // - Works with any curve supported by the underlying proving system
 // - Preserves the additive homomorphic property described in Section 2.4
+// - Implements the message embedding approach from Section 2.5
 //
 // The implementation follows the mathematical formulation in the documentation with
 // function signatures designed to be simple and composable.
@@ -16,15 +17,20 @@ use std::embedded_curve_ops::{
     multi_scalar_mul,
 };
 
-/// Implements key generation as in Section 2.1
-/// Computes H = x . G (Equation 2.1)
-pub fn public_key(priv_key: Field) -> EmbeddedCurvePoint {
-    field_to_point(priv_key)
-}
+// #region utils
 
 /// Field to point, x . G
 pub fn field_to_point(x: Field) -> EmbeddedCurvePoint {
     fixed_base_scalar_mul(EmbeddedCurveScalar::from_field(x))
+}
+
+// #endregion utils
+
+
+/// Implements key generation as in Section 2.1
+/// Computes H = x . G (Equation 2.1)
+pub fn public_key(priv_key: Field) -> EmbeddedCurvePoint {
+    field_to_point(priv_key)
 }
 
 /// Encryption as defined in Section 2.2
@@ -51,4 +57,18 @@ pub fn decrypt(
     let x = EmbeddedCurveScalar::from_field(priv_key);
     let diff = multi_scalar_mul([c1], [x]);
     embedded_curve_add(c2, -diff)
+}
+
+
+/// Message embedding function f(m) = m . G from Section 2.5
+/// Fails if message is over 40 bits
+pub fn embed_message(m: Field) -> EmbeddedCurvePoint {
+	assert_max_bit_size<40>(m);
+	field_to_point(m)
+}
+
+/// Verifies that a point is the correct embedding of a message
+/// Implements the verification function from Section 2.5
+pub fn verify_embedding(m: Field, embedding: EmbeddedCurvePoint) {
+	assert(embedding == field_to_point(m));	
 }
