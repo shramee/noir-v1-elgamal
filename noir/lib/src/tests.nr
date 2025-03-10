@@ -30,13 +30,13 @@ fn test_encrypt_decrypt() {
 fn test_embedding_fail() {
     // let m = 0x03de9c86d98bf24ffaac6e38fb55c8c45f73a33bdd4b2d8c904f2c34971356c2;
     let m = 0xffffffffff + 1; // larger than 40 bits
-    let P_m = embed_message(m);
+    let _P_m = embed_message(m);
 }
 
 #[test]
 fn test_embedding() {
     let m = 0xe49aafaf9a;
-    let P_m = embed_message(m);
+    let _P_m = embed_message(m);
 }
 
 #[test(should_fail)]
