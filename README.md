@@ -1,5 +1,4 @@
-# Elgamal Cryptosystem for Noir v1+
-
+# Elgamal Cryptosystem on Elliptic Curve for Additive homomorphism
 
 ## 1. Elgamal on a Multiplicative group of integers
 
