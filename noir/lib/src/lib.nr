@@ -1,18 +1,34 @@
+// ElGamal Cryptosystem Implementation
+//
+// This library implements the elliptic curve variant of the ElGamal cryptosystem as described
+// in the accompanying documentation. It provides functions for key generation, message embedding,
+// encryption and decryption with the following features:
+//
+// - Curve-agnostic implementation: No elliptic curve parameters are hardcoded in this library
+// - Works with any curve supported by the underlying proving system
+// - Preserves the additive homomorphic property described in Section 2.4
+//
+// The implementation follows the mathematical formulation in the documentation with
+// function signatures designed to be simple and composable.
 
 use std::embedded_curve_ops::{
     embedded_curve_add, EmbeddedCurvePoint, EmbeddedCurveScalar, fixed_base_scalar_mul,
     multi_scalar_mul,
 };
 
-
+/// Implements key generation as in Section 2.1
+/// Computes H = x . G (Equation 2.1)
 pub fn public_key(priv_key: Field) -> EmbeddedCurvePoint {
     field_to_point(priv_key)
 }
 
+/// Field to point, x . G
 pub fn field_to_point(x: Field) -> EmbeddedCurvePoint {
     fixed_base_scalar_mul(EmbeddedCurveScalar::from_field(x))
 }
 
+/// Encryption as defined in Section 2.2
+/// Computes (C_1, C_2) = (r . G, r . H + P_m)`$ (Equation 2.2)
 pub fn encrypt(
     pub_key: EmbeddedCurvePoint,
     message: Field,
@@ -25,6 +41,8 @@ pub fn encrypt(
     (c1, c2)
 }
 
+/// Decryption as per Section 2.3
+/// Computes C_2 - x . C_1 = P_m
 pub fn decrypt(
     c1: EmbeddedCurvePoint,
     c2: EmbeddedCurvePoint,
