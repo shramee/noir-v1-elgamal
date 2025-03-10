@@ -1,6 +1,6 @@
-# Elgamal Cryptosystem on Elliptic Curve for Additive homomorphism
+# ElGamal Cryptosystem on Elliptic Curve for Additive homomorphism
 
-## 1. Elgamal on a Multiplicative group of integers
+## 1. ElGamal on a Multiplicative group of integers
 
 _As described in https://en.wikipedia.org/wiki/ElGamal_encryption#The_algorithm_
 
@@ -35,7 +35,7 @@ $`= (g^{r_1}, m_1 * h^{r_1})(g^{r_2}, m_2 * h^{r_2})`$
 $`= (g^{r_1+r_2}, (m_1*m_2)h^{r_1+r_2})`$  
 $`= E(m_1*m_2)`$, encryption of product of two plaintexts.
 
-## 2. Elgamal on Elliptic curves
+## 2. ElGamal on Elliptic curves
 
 _As described in the paper [Elliptic Curve Cryptosystems by Neal Koblitz](https://www.ams.org/journals/mcom/1987-48-177/S0025-5718-1987-0866109-5/S0025-5718-1987-0866109-5.pdf)_
 
