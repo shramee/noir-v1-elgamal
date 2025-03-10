@@ -77,3 +77,32 @@ Adding the pairs of cyphertext points, $E(P_{m1}) + E(P_{m2})$
 $= (G \cdot {r_1}, P_{m1} \cdot (r_1 \cdot H))(G \cdot {r_2}, P_{m2} \cdot (r_2 \cdot H))$  
 $= (G \cdot {r_1+r_2}, (P_{m1} + P_{m2})\cdot ({r_1+r_2} \cdot H))$  
 $= E(P_{m1} + P_{m2}) ~~ = ~~ E(f({m1}) + f({m2}))$ $~~$ encryption of the sum of the two message points.
+
+### 2.5 Message embedding
+It's time to talk about the mapping functions $f(m)$ and reverse  $f^{-1}(m)$ such that $f:m ↦ P_m$ and $f^{-1}:P_m ↦ m$.
+
+The ideas illustrated in Section 3 of the paper [Elliptic Curve Cryptosystems](https://www.ams.org/journals/mcom/1987-48-177/S0025-5718-1987-0866109-5/S0025-5718-1987-0866109-5.pdf) don't work for us.
+We need the point $P_m$ to be repesentative of the original value of $m$ on the curve scalar field, i.e. $P_m$ needs to be the m-th point on the curve from the generator, $G$.
+
+Luckily we've come a long way since the paper was written, and now, for $|m| <= 40$, consumer hardware can find the forty bit $m$ from $m \cdot G$ in a few seconds if not under a second everytime.
+
+This can be found outside the circuit, provided as a hint and verified with a simple scalar multiplication in the circuit. So,
+
+$f(m)$ in the circuit looks like,
+
+$f(m) = 
+\begin{cases} 
+m \cdot G & \text{if } \lfloor \log_2(m) \rfloor + 1 < 40 \\
+\text{fail} & \text{otherwise}
+\end{cases}$
+
+
+$f^{-1}(...)$ takes the value of $m$ computed outside the curve and asserts $P_m$ equals $m \cdot G$,
+
+$f^{-1}(m, P_m) = 
+\begin{cases} 
+\text{pass} & m \cdot G = P_m \\
+\text{fail} & \text{otherwise}
+\end{cases}$
+
+With these definitions for $f(m)$ and $f^{-1}(P_m, m)$ we preserve homomorphism between the original messages, i.e. the homomorphism on the points as described in section 2.4 extends to the original plaintexts.
