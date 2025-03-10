@@ -78,6 +78,6 @@ pub fn embed_message(m: Field) -> EmbeddedCurvePoint {
 
 /// Verifies that a point is the correct embedding of a message
 /// Implements the verification function from Section 2.5
-pub fn verify_embedding(m: Field, embedding: EmbeddedCurvePoint) {
+pub fn verify_embedding(embedding: EmbeddedCurvePoint, m: Field) {
 	assert(embedding == field_to_point(m));	
 }

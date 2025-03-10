@@ -26,3 +26,29 @@ fn test_encrypt_decrypt() {
     assert(res.y == embedded.y);
 }
 
+#[test(should_fail)]
+fn test_embedding_fail() {
+    // let m = 0x03de9c86d98bf24ffaac6e38fb55c8c45f73a33bdd4b2d8c904f2c34971356c2;
+    let m = 0xffffffffff + 1; // larger than 40 bits
+    let P_m = embed_message(m);
+}
+
+#[test]
+fn test_embedding() {
+    let m = 0xe49aafaf9a;
+    let P_m = embed_message(m);
+}
+
+#[test(should_fail)]
+fn test_verify_embedding_fail() {
+    // let m = 0x03de9c86d98bf24ffaac6e38fb55c8c45f73a33bdd4b2d8c904f2c34971356c2;
+    let P_m = embed_message(0x2525252525);
+	verify_embedding(P_m, 0x6969696969);
+}
+
+#[test]
+fn test_verify_embedding() {
+    let P_m = embed_message(0xe49aafaf9a);
+	verify_embedding(P_m, 0xe49aafaf9a);
+}
+
