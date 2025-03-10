@@ -43,27 +43,34 @@ pub fn encrypt(
     // @Optimise: Use multi_scalar_mul instead of separate fixed_base_scalar_mul
     let c1 = field_to_point(randomness);
     let embedded_message = field_to_point(message);
-    let c2 = embedded_curve_add(embedded_message, multi_scalar_mul([pub_key], [r]));
+    let c2 = embedded_curve_add(embedded_message, multi_scalar_mul([pub_key], [EmbeddedCurveScalar::from_field(randomness)]));
     (c1, c2)
 }
 
 /// Decryption as per Section 2.3
 /// Computes C_2 - x . C_1 = P_m
 pub fn decrypt(
-    c1: EmbeddedCurvePoint,
-    c2: EmbeddedCurvePoint,
+    ct: (EmbeddedCurvePoint, EmbeddedCurvePoint),
     priv_key: Field,
 ) -> EmbeddedCurvePoint {
     let x = EmbeddedCurveScalar::from_field(priv_key);
-    let diff = multi_scalar_mul([c1], [x]);
-    embedded_curve_add(c2, -diff)
+    let diff = multi_scalar_mul([ct.0], [x]);
+    embedded_curve_add(ct.1, -diff)
 }
 
+/// Additively homomorphic property as in Section 2.4
+/// Computes (A_1 + B_1, A_2 + B_2)
+pub fn add_ciphertexts(
+	a: (EmbeddedCurvePoint, EmbeddedCurvePoint),
+	b: (EmbeddedCurvePoint, EmbeddedCurvePoint),
+) -> (EmbeddedCurvePoint, EmbeddedCurvePoint) {
+	(embedded_curve_add(a.0, b.0), embedded_curve_add(a.1, b.1))
+}
 
 /// Message embedding function f(m) = m . G from Section 2.5
 /// Fails if message is over 40 bits
 pub fn embed_message(m: Field) -> EmbeddedCurvePoint {
-	assert_max_bit_size<40>(m);
+	m.assert_max_bit_size::<40>();
 	field_to_point(m)
 }
 
