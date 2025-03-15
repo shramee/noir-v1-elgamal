@@ -1,6 +1,30 @@
-# ElGamal Cryptosystem on Elliptic Curve for Additive homomorphism
+ElGamal Cryptosystem on Elliptic Curve for Additive homomorphism
+----------------------------------------------------------------
 
 The project includes description of math behind ElGamal, its adpatation to Elliptic curve groups and an implementation in Noir.
+
+- [ElGamal Cryptosystem on Elliptic Curve for Additive homomorphism](#elgamal-cryptosystem-on-elliptic-curve-for-additive-homomorphism)
+- [1. ElGamal on a Multiplicative group of integers](#1-elgamal-on-a-multiplicative-group-of-integers)
+	- [1.1 Key generation](#11-key-generation)
+		- [Public key, $`h=g^x`$   _(Equation 1.1)_](#public-key-hgx--equation-11)
+	- [1.2 Encryption](#12-encryption)
+		- [$`(c_1,c_2)=(g^r, h^r*m)`$   _(Equation 1.2)_](#c_1c_2gr-hrm--equation-12)
+	- [1.3 Decryption](#13-decryption)
+	- [1.4 Homomorphic property](#14-homomorphic-property)
+- [2. ElGamal on Elliptic curves](#2-elgamal-on-elliptic-curves)
+	- [2.1 Key generation](#21-key-generation)
+		- [Public key, $`H=x \cdot G`$   _(Equation 2.1)_](#public-key-hx-cdot-g--equation-21)
+	- [2.2 Encryption](#22-encryption)
+		- [$`(C_1,C_2)=(r \cdot G,r \cdot H + P_m)`$   _(Equation 2.2)_](#c_1c_2r-cdot-gr-cdot-h--p_m--equation-22)
+	- [2.3 Decryption](#23-decryption)
+	- [2.4 Homomorphic property](#24-homomorphic-property)
+	- [2.5 Message embedding](#25-message-embedding)
+- [3. Implementation and Usage](#3-implementation-and-usage)
+	- [3.1 Key Generation](#31-key-generation)
+	- [3.2 Message Embedding](#32-message-embedding)
+	- [3.3 Encryption and Decryption](#33-encryption-and-decryption)
+	- [3.4 Homomorphic Addition](#34-homomorphic-addition)
+	- [3.5 Limitations and Security Considerations](#35-limitations-and-security-considerations)
 
 ## 1. ElGamal on a Multiplicative group of integers
 
@@ -14,21 +38,21 @@ Choose an integer **x** `x ∈ {1,2,...,q−1}` as the private key.
 
 Public key `h = gˣ`, agreed upon group parameter G, q, g skipped for simplicity.
 
-#### Public key, $`h=g^x`$ $`~~~~`$ _(Equation 1.1)_
+#### Public key, $`h=g^x`$ &emsp; _(Equation 1.1)_
 
 ### 1.2 Encryption
 
 Choose a random integer **r** `r ∈ {1,2,...,q−1}`.
 
-#### $`(c_1,c2)=(g^r, h^r*m)`$ $`~~~~`$ _(Equation 1.2)_
+#### $`(c_1,c_2)=(g^r, h^r*m)`$ &emsp; _(Equation 1.2)_
 
 ### 1.3 Decryption
 
 Compute $`c_1^x`$ and multiply $`c_2`$ by it's inverse in group G, i.e. $`c_2/c_1^x`$.
 
 $`c_2/(c_1)^x`$  
-$`=(h^r*m)/(g^r)^x`$ $`~~~~`$ ($`c_1`$ and $`c_2`$ from equation 1.2)  
-$`= (g^x)^r*m/(g^r)^x`$ $`~~~~`$ ($`h`$ from equation 1.1)  
+$`=(h^r*m)/(g^r)^x`$ &emsp; ($`c_1`$ and $`c_2`$ from equation 1.2)  
+$`= (g^x)^r*m/(g^r)^x`$ &emsp; ($`h`$ from equation 1.1)  
 $`= m`$
 
 ### 1.4 Homomorphic property
@@ -54,7 +78,7 @@ We need a public known reversible function, $`f:m ↦ P_m`$. Function $`f`$ **re
 
 Choose an integer **x** `x ∈ {1,2,...,q−1}` as the private key.
 
-#### Public key, $`H=x \cdot G`$ $`~~~~`$ _(Equation 2.1)_
+#### Public key, $`H=x \cdot G`$ &emsp; _(Equation 2.1)_
 
 ### 2.2 Encryption
 
@@ -62,15 +86,15 @@ Choose a random integer **r** `r ∈ {1,2,...,q−1}`.
 
 Map plaintext $`m`$ to point $`P_m = f(m)`$.
 
-#### $`(C_1,C_2)=(r \cdot G,r \cdot H + P_m)`$ $`~~~~`$ _(Equation 2.2)_
+#### $`(C_1,C_2)=(r \cdot G,r \cdot H + P_m)`$ &emsp; _(Equation 2.2)_
 
 ### 2.3 Decryption
 
 Compute $`x \cdot C_1`$ and add its negative to $`C_2`$, i.e. essentially $`C_2 - x \cdot C_1`$.
 
 $`C_2 - x \cdot (C_1)`$  
-$`=(r \cdot H + P_m) - x \cdot (r \cdot G)`$ $`~~~~`$ ($`C_1`$ and $`C_2`$ from equation 2.2)  
-$`=(r \cdot (x \cdot G) + P_m) - x \cdot (r \cdot G)`$ $`~~~~`$ ($`H`$ from equation 2.1)  
+$`=(r \cdot H + P_m) - x \cdot (r \cdot G)`$ &emsp; ($`C_1`$ and $`C_2`$ from equation 2.2)  
+$`=(r \cdot (x \cdot G) + P_m) - x \cdot (r \cdot G)`$ &emsp; ($`H`$ from equation 2.1)  
 $`= P_m`$
 
 ### 2.4 Homomorphic property
