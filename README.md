@@ -1,5 +1,7 @@
 # ElGamal Cryptosystem on Elliptic Curve for Additive homomorphism
 
+The project includes description of math behind ElGamal, its adpatation to Elliptic curve groups and an implementation in Noir.
+
 ## 1. ElGamal on a Multiplicative group of integers
 
 _As described in https://en.wikipedia.org/wiki/ElGamal_encryption#The_algorithm_
@@ -105,3 +107,123 @@ $`f^{-1}(m, P_m) =
 \end{cases}`$
 
 With these definitions for $`f(m)`$ and $`f^{-1}(P_m, m)`$ we preserve homomorphism between the original messages, i.e. the homomorphism on the points as described in section 2.4 extends to the original plaintexts.
+
+## 3. Implementation and Usage
+
+This library implements the ElGamal cryptosystem in Noir, providing homomorphic encryption capabilities that can be used within zero-knowledge proofs.
+
+### 3.1 Key Generation
+
+Generate a public key from a private key:
+
+```rs
+use elgamal::{public_key};
+
+fn main() {
+    // Create a private key (a scalar field element)
+    let priv_key = 0x04d73359c9166e49aafaf9a4852eaa4dceb2c26878196b10e9048004ff5cc20c;
+    
+    // Generate the corresponding public key (a point on the curve)
+    let pub_key = public_key(priv_key);
+    
+    // pub_key is now a point (x, y) on the elliptic curve
+}
+```
+
+### 3.2 Message Embedding
+
+Before encrypting a message, it needs to be embedded as a point on the elliptic curve:
+
+```rs
+use elgamal::{embed_message, verify_embedding};
+
+fn main() {
+    // Message must be at most 40 bits (values larger than 0xffffffffff will fail)
+    let message = 0xe49aafaf9a;
+    
+    // Embed the message as a point on the curve
+    let point = embed_message(message);
+    
+    // You can verify that a point corresponds to a specific message
+    verify_embedding(point, message); // Returns true if the embedding is correct
+}
+```
+
+### 3.3 Encryption and Decryption
+
+Encrypt a message using a public key:
+
+```rs
+use elgamal::{field_to_point, public_key, encrypt, decrypt};
+
+fn main() {
+    // Set up keys
+    let priv_key = 0x04d73359c9166e49aafaf9a4852eaa4dceb2c26878196b10e9048004ff5cc20c;
+    let pub_key = public_key(priv_key);
+    
+    // Message to encrypt (as a Field element)
+    let message: u32 = 0x12345678;
+    
+    // Randomness for encryption (important for security)
+    let randomness = 0x030cffca80ca4344e54e436fc5a03ae8e884b8f3edcb780702599e1951e8aa62;
+    
+    // Encrypt the message
+    let ciphertext = encrypt(pub_key, message as Field, randomness);
+    
+    // Decrypt the ciphertext using the private key
+    let decrypted_point = decrypt(ciphertext, priv_key);
+    
+    // Convert the original message to a point for comparison
+    let original_point = field_to_point(message as Field);
+    
+    // Verify decryption was successful
+    assert(decrypted_point.x == original_point.x);
+    assert(decrypted_point.y == original_point.y);
+}
+```
+
+### 3.4 Homomorphic Addition
+
+One of the key features of ElGamal is homomorphic addition, allowing computations on encrypted data:
+
+```rs
+use elgamal::{public_key, encrypt, decrypt, add_ciphertexts, field_to_point};
+
+fn main() {
+    // Set up keys
+    let priv_key = 0x04d73359c9166e49aafaf9a4852eaa4dceb2c26878196b10e9048004ff5cc20c;
+    let pub_key = public_key(priv_key);
+    
+    // First message
+    let a: u32 = 0x12345678;
+    let r_a = 0x030cffca80ca4344e54e436fc5a03ae8e884b8f3edcb780702599e1951e8aa62;
+    let ciphertext_a = encrypt(pub_key, a as Field, r_a);
+    
+    // Second message
+    let b: u32 = 0x10000000;
+    let r_b = 0x030cffca80ca4344e54e436fc5a03ae8e884b8f3edcb780702599e1951e8aa62;
+    let ciphertext_b = encrypt(pub_key, b as Field, r_b);
+    
+    // Add the ciphertexts (this adds the underlying plaintexts)
+    let sum_ciphertext = add_ciphertexts(ciphertext_a, ciphertext_b);
+    
+    // Decrypt the sum
+    let decrypted_sum = decrypt(sum_ciphertext, priv_key);
+    
+    // The expected sum as a point
+    let expected_sum_point = field_to_point((a + b) as Field);
+    
+    // Verify the homomorphic addition worked correctly
+    assert(decrypted_sum.x == expected_sum_point.x);
+    assert(decrypted_sum.y == expected_sum_point.y);
+}
+```
+
+### 3.5 Limitations and Security Considerations
+
+- Messages must be at most 40 bits in size (values greater than `0xffffffffff` will fail)
+- Proper randomness should be used for encryption in production settings
+- The library assumes working with the default Noir elliptic curve
+- Always use fresh randomness for each encryption
+- Keep private keys secure and do not expose them in circuit outputs
+- Be mindful of potential attacks specific to homomorphic encryption systems
