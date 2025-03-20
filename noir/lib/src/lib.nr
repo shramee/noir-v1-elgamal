@@ -21,13 +21,14 @@ use std::embedded_curve_ops::{
 
 // #region utils
 
+pub type CipherText = (EmbeddedCurvePoint, EmbeddedCurvePoint);
+
 /// Field to point, x . G
 pub fn field_to_point(x: Field) -> EmbeddedCurvePoint {
     fixed_base_scalar_mul(EmbeddedCurveScalar::from_field(x))
 }
 
 // #endregion utils
-
 
 /// Implements key generation as in Section 2.1
 /// Computes H = x . G (Equation 2.1)
@@ -37,24 +38,30 @@ pub fn public_key(priv_key: Field) -> EmbeddedCurvePoint {
 
 /// Encryption as defined in Section 2.2
 /// Computes (C_1, C_2) = (r . G, r . H + P_m)`$ (Equation 2.2)
-pub fn encrypt(
+pub fn encrypt(pub_key: EmbeddedCurvePoint, message: Field, randomness: Field) -> CipherText {
+    // @Optimise: Use multi_scalar_mul instead of separate fixed_base_scalar_mul
+    encrypt_pt(pub_key, field_to_point(message), randomness)
+}
+
+/// Encryption as defined in Section 2.2
+/// Computes (C_1, C_2) = (r . G, r . H + P_m)`$ (Equation 2.2)
+pub fn encrypt_pt(
     pub_key: EmbeddedCurvePoint,
-    message: Field,
+    embedded_message: EmbeddedCurvePoint,
     randomness: Field,
-) -> (EmbeddedCurvePoint, EmbeddedCurvePoint) {
+) -> CipherText {
     // @Optimise: Use multi_scalar_mul instead of separate fixed_base_scalar_mul
     let c1 = field_to_point(randomness);
-    let embedded_message = field_to_point(message);
-    let c2 = embedded_curve_add(embedded_message, multi_scalar_mul([pub_key], [EmbeddedCurveScalar::from_field(randomness)]));
+    let c2 = embedded_curve_add(
+        embedded_message,
+        multi_scalar_mul([pub_key], [EmbeddedCurveScalar::from_field(randomness)]),
+    );
     (c1, c2)
 }
 
 /// Decryption as per Section 2.3
 /// Computes C_2 - x . C_1 = P_m
-pub fn decrypt(
-    ct: (EmbeddedCurvePoint, EmbeddedCurvePoint),
-    priv_key: Field,
-) -> EmbeddedCurvePoint {
+pub fn decrypt(ct: CipherText, priv_key: Field) -> EmbeddedCurvePoint {
     let x = EmbeddedCurveScalar::from_field(priv_key);
     let diff = multi_scalar_mul([ct.0], [x]);
     embedded_curve_add(ct.1, -diff)
@@ -62,22 +69,19 @@ pub fn decrypt(
 
 /// Additively homomorphic property as in Section 2.4
 /// Computes (A_1 + B_1, A_2 + B_2)
-pub fn add_ciphertexts(
-	a: (EmbeddedCurvePoint, EmbeddedCurvePoint),
-	b: (EmbeddedCurvePoint, EmbeddedCurvePoint),
-) -> (EmbeddedCurvePoint, EmbeddedCurvePoint) {
-	(embedded_curve_add(a.0, b.0), embedded_curve_add(a.1, b.1))
+pub fn add_ciphertexts(a: CipherText, b: CipherText) -> CipherText {
+    (embedded_curve_add(a.0, b.0), embedded_curve_add(a.1, b.1))
 }
 
 /// Message embedding function f(m) = m . G from Section 2.5
 /// Fails if message is over 40 bits
 pub fn embed_message(m: Field) -> EmbeddedCurvePoint {
-	m.assert_max_bit_size::<40>();
-	field_to_point(m)
+    m.assert_max_bit_size::<40>();
+    field_to_point(m)
 }
 
 /// Verifies that a point is the correct embedding of a message
 /// Implements the verification function from Section 2.5
 pub fn verify_embedding(embedding: EmbeddedCurvePoint, m: Field) {
-	assert(embedding == field_to_point(m));	
+    assert(embedding == field_to_point(m));
 }
